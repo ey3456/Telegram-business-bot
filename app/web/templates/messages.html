@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta charset="UTF-8"><title>消息记录</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="sidebar">
+<div class="logo">📊 Bot Admin</div>
+<a href="/">📈 控制台</a>
+<a href="/messages" class="active">💬 消息记录</a>
+<a href="/expenses">💰 记账管理</a>
+<a href="/users">👥 用户管理</a>
+<a href="/logout">退出</a>
+</div>
+<div class="main">
+<div class="header"><h2>💬 所有聊天消息</h2></div>
+<div class="filters">
+<form method="GET" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+<select name="user_id">
+<option value="">全部用户</option>
+{% for u in users %}
+<option value="{{ u.id }}" {% if filters.user_id == u.id %}selected{% endif %}>{{ u.first_name }} ({{ u.telegram_id }})</option>
+{% endfor %}
+</select>
+<select name="sender_type">
+<option value="">全部发送者</option>
+<option value="customer" {% if filters.sender_type == 'customer' %}selected{% endif %}>客户</option>
+<option value="business_owner" {% if filters.sender_type == 'business_owner' %}selected{% endif %}>企业主</option>
+<option value="bot" {% if filters.sender_type == 'bot' %}selected{% endif %}>机器人</option>
+</select>
+<label><input type="checkbox" name="show_deleted" value="true" {% if filters.show_deleted %}checked{% endif %}> 显示已撤回</label>
+<button type="submit">筛选</button>
+<a href="/messages" style="color:#4ecdc4;margin-left:10px;">重置</a>
+</form>
+</div>
+<table>
+<thead><tr><th>ID</th><th>发送者</th><th>用户</th><th>类型</th><th>内容</th><th>状态</th><th>时间</th><th>操作</th></tr></thead>
+<tbody>
+{% for m in messages %}
+<tr class="{% if m.is_deleted %}deleted{% endif %}{% if m.is_edited %}edited{% endif %}">
+<td>{{ m.id }}</td><td>{{ m.sender_type }}</td><td>{{ m.user.first_name if m.user else '未知' }}</td>
+<td>{{ m.content_type }}</td><td class="msg-content">{{ m.content[:80] }}{% if m.content|length > 80 %}...{% endif %}</td>
+<td>{% if m.is_deleted %}🔴 已撤回{% elif m.is_edited %}✏️ 已编辑{% else %}✅ 正常{% endif %}</td>
+<td>{{ m.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+<td><button onclick="viewMessage({{ m.id }})" style="background:#4ecdc4;border:none;padding:4px 10px;border-radius:4px;cursor:pointer;">详情</button>
+{% if m.is_deleted %}<button onclick="restoreMessage({{ m.id }})" style="background:#ffe66d;border:none;padding:4px 10px;border-radius:4px;cursor:pointer;">恢复</button>{% endif %}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+<div class="pagination">
+{% if page > 1 %}<a href="?page={{ page - 1 }}&{{ filters_query }}">上一页</a>{% endif %}
+<span>第 {{ page }} / {{ total_pages }} 页</span>
+{% if page < total_pages %}<a href="?page={{ page + 1 }}&{{ filters_query }}">下一页</a>{% endif %}
+</div>
+</div>
+<div id="modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);justify-content:center;align-items:center;z-index:999;">
+<div style="background:#1e1e2f;padding:30px;border-radius:12px;max-width:600px;width:90%;">
+<h3>📄 消息详情</h3>
+<pre id="modal-content" style="background:#0d0d1a;padding:15px;border-radius:6px;max-height:400px;overflow:auto;white-space:pre-wrap;word-wrap:break-word;"></pre>
+<button onclick="closeModal()" style="margin-top:12px;background:#e94560;border:none;padding:8px 20px;border-radius:6px;color:#fff;cursor:pointer;">关闭</button>
+</div>
+</div>
+<script>
+function viewMessage(id){fetch('/api/messages/'+id).then(r=>r.json()).then(d=>{let t=`ID: ${d.id}\n消息ID: ${d.message_id}\n发送者: ${d.sender_type}\n类型: ${d.content_type}\n内容: ${d.content||'(无)'}\n`;if(d.original_content)t+=`\n原始内容(编辑前):\n${d.original_content}\n`;if(d.is_deleted)t+=`\n⛔ 已撤回于: ${d.deleted_at}`;document.getElementById('modal-content').textContent=t;document.getElementById('modal').style.display='flex';});}
+function restoreMessage(id){if(!confirm('确认恢复？'))return;fetch('/api/messages/'+id+'/restore',{method:'POST'}).then(r=>r.json()).then(res=>{if(res.success)location.reload();else alert('恢复失败');});}
+function closeModal(){document.getElementById('modal').style.display='none';}
+</script>
+</body>
+</html>

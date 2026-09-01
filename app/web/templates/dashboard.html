@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta charset="UTF-8"><title>控制台</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="sidebar">
+<div class="logo">📊 Bot Admin</div>
+<a href="/" class="active">📈 控制台</a>
+<a href="/messages">💬 消息记录</a>
+<a href="/expenses">💰 记账管理</a>
+<a href="/users">👥 用户管理</a>
+<a href="/logout" style="margin-top:40px;color:#ff6b6b;">退出</a>
+</div>
+<div class="main">
+<div class="header"><h2>📊 数据总览</h2><span class="time">{{ now }}</span></div>
+<div class="stats-grid">
+<div class="stat-card"><div class="num">{{ total_users }}</div><div class="label">总用户</div></div>
+<div class="stat-card"><div class="num">{{ total_messages }}</div><div class="label">总消息数</div></div>
+<div class="stat-card"><div class="num">{{ today_messages }}</div><div class="label">今日消息</div></div>
+<div class="stat-card"><div class="num">{{ deleted_messages }}</div><div class="label">已撤回（保留）</div></div>
+<div class="stat-card"><div class="num">{{ edited_messages }}</div><div class="label">已编辑</div></div>
+<div class="stat-card"><div class="num" style="color:#4ecdc4;">{{ "%.2f"|format(total_income) }}</div><div class="label">本月收入</div></div>
+<div class="stat-card"><div class="num" style="color:#ff6b6b;">{{ "%.2f"|format(total_expense) }}</div><div class="label">本月支出</div></div>
+<div class="stat-card"><div class="num" style="color:#ffe66d;">{{ "%.2f"|format(balance) }}</div><div class="label">结余</div></div>
+</div>
+<div style="margin-top:30px;background:#1e1e2f;padding:20px;border-radius:10px;">
+<h3>📈 近7日消息趋势</h3>
+<div style="height:200px;display:flex;align-items:flex-end;gap:20px;padding-top:20px;">
+{% for d in daily %}
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;">
+<div style="background:#4ecdc4;width:100%;border-radius:4px 4px 0 0;height:{{ (d.count / max_daily * 100)|int if max_daily > 0 else 0 }}%;min-height:4px;"></div>
+<span style="color:#aaa;font-size:12px;margin-top:6px;">{{ d.date }}</span>
+<span style="color:#fff;font-size:11px;">{{ d.count }}</span>
+</div>
+{% endfor %}
+</div>
+</div>
+</div>
+<script src="/static/main.js"></script>
+</body>
+</html>

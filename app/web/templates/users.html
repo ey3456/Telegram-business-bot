@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta charset="UTF-8"><title>用户管理</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="sidebar">
+<div class="logo">📊 Bot Admin</div>
+<a href="/">📈 控制台</a>
+<a href="/messages">💬 消息记录</a>
+<a href="/expenses">💰 记账管理</a>
+<a href="/users" class="active">👥 用户管理</a>
+<a href="/logout">退出</a>
+</div>
+<div class="main">
+<div class="header"><h2>👥 所有用户</h2></div>
+<table>
+<thead><tr><th>ID</th><th>Telegram ID</th><th>用户名</th><th>姓名</th><th>消息数</th><th>记账数</th><th>注册时间</th></tr></thead>
+<tbody>
+{% for u in users %}
+<tr>
+<td>{{ u.id }}</td><td>{{ u.telegram_id }}</td><td>{{ u.username or '无' }}</td>
+<td>{{ u.first_name }} {{ u.last_name or '' }}</td>
+<td>{{ stats[u.id]['messages'] if u.id in stats else 0 }}</td>
+<td>{{ stats[u.id]['expenses'] if u.id in stats else 0 }}</td>
+<td>{{ u.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</body>
+</html>

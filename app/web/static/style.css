@@ -1,0 +1,28 @@
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#0d0d1a;color:#e0e0e0;display:flex;min-height:100vh}
+.sidebar{width:220px;background:#16162e;padding:20px 0;min-height:100vh;border-right:1px solid #2a2a4a}
+.sidebar .logo{font-size:20px;font-weight:700;padding:0 20px 30px;color:#4ecdc4}
+.sidebar a{display:block;padding:12px 20px;color:#aaa;text-decoration:none;transition:0.2s;border-left:3px solid transparent}
+.sidebar a:hover,.sidebar a.active{background:#1e1e3a;color:#fff;border-left-color:#4ecdc4}
+.main{flex:1;padding:30px;overflow-x:auto}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px}
+.header h2{font-weight:300}
+.time{color:#888;font-size:14px}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:16px}
+.stat-card{background:#16162e;padding:16px 18px;border-radius:10px;text-align:center;border:1px solid #2a2a4a}
+.stat-card .num{font-size:28px;font-weight:700}
+.stat-card .label{font-size:13px;color:#888;margin-top:4px}
+table{width:100%;border-collapse:collapse;margin-top:15px;font-size:14px}
+th{text-align:left;padding:10px 12px;background:#1a1a2e;color:#aaa;font-weight:400;border-bottom:2px solid #2a2a4a}
+td{padding:10px 12px;border-bottom:1px solid #1e1e32}
+tr.deleted{background:#2a1a1a}
+tr.deleted td{color:#aa6666}
+tr.edited td{color:#ffe66d}
+.msg-content{max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.filters{background:#16162e;padding:15px 20px;border-radius:8px;margin-bottom:20px}
+.filters select,.filters input,.filters button{padding:6px 12px;border-radius:4px;border:1px solid #2a2a4a;background:#0d0d1a;color:#fff}
+.filters button{background:#4ecdc4;border:none;color:#0d0d1a;font-weight:600;cursor:pointer}
+.pagination{margin-top:20px;display:flex;gap:15px;align-items:center;justify-content:center}
+.pagination a{color:#4ecdc4;text-decoration:none;padding:4px 12px;border:1px solid #2a2a4a;border-radius:4px}
+.pagination a:hover{background:#2a2a4a}
+.summary-box strong{font-size:18px}

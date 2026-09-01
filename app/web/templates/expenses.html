@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta charset="UTF-8"><title>记账管理</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="sidebar">
+<div class="logo">📊 Bot Admin</div>
+<a href="/">📈 控制台</a>
+<a href="/messages">💬 消息记录</a>
+<a href="/expenses" class="active">💰 记账管理</a>
+<a href="/users">👥 用户管理</a>
+<a href="/logout">退出</a>
+</div>
+<div class="main">
+<div class="header"><h2>💰 记账流水</h2></div>
+<div class="summary-box" style="display:flex;gap:30px;background:#1a1a2e;padding:15px 20px;border-radius:8px;margin-bottom:20px;">
+<span>总收入: <strong style="color:#4ecdc4;">{{ "%.2f"|format(total_income) }}</strong></span>
+<span>总支出: <strong style="color:#ff6b6b;">{{ "%.2f"|format(total_expense) }}</strong></span>
+<span>结余: <strong style="color:#ffe66d;">{{ "%.2f"|format(balance) }}</strong></span>
+</div>
+<div class="filters">
+<form method="GET" style="display:flex;gap:12px;flex-wrap:wrap;">
+<select name="user_id">
+<option value="">全部用户</option>
+{% for u in users %}
+<option value="{{ u.id }}" {% if request.args.get('user_id')|int == u.id %}selected{% endif %}>{{ u.first_name }}</option>
+{% endfor %}
+</select>
+<select name="category">
+<option value="">全部分类</option>
+{% for c in categories %}
+<option value="{{ c }}" {% if request.args.get('category') == c %}selected{% endif %}>{{ c }}</option>
+{% endfor %}
+</select>
+<button type="submit">筛选</button>
+<a href="/expenses" style="color:#4ecdc4;">重置</a>
+</form>
+</div>
+<table>
+<thead><tr><th>ID</th><th>用户</th><th>金额</th><th>分类</th><th>描述</th><th>日期</th></tr></thead>
+<tbody>
+{% for e in expenses %}
+<tr>
+<td>{{ e.id }}</td><td>{{ e.user.first_name if e.user else '未知' }}</td>
+<td style="color:{% if e.amount > 0 %}#4ecdc4{% else %}#ff6b6b{% endif %};">{{ "%.2f"|format(e.amount) }}</td>
+<td>{{ e.category or '未分类' }}</td><td>{{ e.description or '' }}</td>
+<td>{{ e.expense_date.strftime('%Y-%m-%d %H:%M') }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+<div class="pagination">
+{% if page > 1 %}<a href="?page={{ page - 1 }}">上一页</a>{% endif %}
+<span>第 {{ page }} / {{ total_pages }} 页</span>
+{% if page < total_pages %}<a href="?page={{ page + 1 }}">下一页</a>{% endif %}
+</div>
+</div>
+</body>
+</html>
