@@ -43,7 +43,7 @@ class BusinessHandler:
                 session.add(db_user)
                 session.commit()
             sender_type = 'customer'
-            if user_id == self.bot.bot.id:
+            if user_id == self.bot.id:
                 sender_type = 'bot'
             elif hasattr(message, 'business_connection_id') and message.business_connection_id:
                 try:

@@ -10,6 +10,97 @@ class ExpenseHandler:
     def __init__(self, bot: Bot):
         self.bot = bot
         self.service = ExpenseService()
+    def _parse_command_args(self, message: types.Message):
+        parts = (message.text or "").split(maxsplit=1)
+        return parts[1].split() if len(parts) > 1 else []
+
+    async def add_expense_command(self, message: types.Message):
+        args = self._parse_command_args(message)
+        if len(args) < 3:
+            await message.answer("❌ 格式: /addexpense 类别 金额 描述")
+            return
+        category = args[0]
+        try:
+            amount = -abs(float(args[1].replace(",", "")))
+        except ValueError:
+            await message.answer("❌ 金额格式错误")
+            return
+        description = " ".join(args[2:])
+        session = get_session()
+        try:
+            user = session.query(User).filter_by(telegram_id=message.from_user.id).first()
+            if not user:
+                user = User(
+                    telegram_id=message.from_user.id,
+                    username=message.from_user.username,
+                    first_name=message.from_user.first_name,
+                )
+                session.add(user)
+                session.commit()
+            expense = Expense(
+                user_id=user.id,
+                amount=amount,
+                category=category,
+                description=description[:500],
+                message_id=message.message_id,
+            )
+            session.add(expense)
+            session.commit()
+            await message.answer(
+                f"✅ 记账成功\n类别: {category}\n金额: ¥{abs(amount):.2f}\n描述: {description}"
+            )
+        except Exception as exc:
+            logger.error("命令记账失败: %s", exc)
+            session.rollback()
+            await message.answer("❌ 记账失败")
+        finally:
+            session.close()
+
+    async def view_expenses(self, message: types.Message):
+        session = get_session()
+        try:
+            user = session.query(User).filter_by(telegram_id=message.from_user.id).first()
+            if not user:
+                await message.answer("📊 暂无支出记录")
+                return
+            rows = (
+                session.query(Expense)
+                .filter_by(user_id=user.id)
+                .order_by(Expense.expense_date.desc())
+                .limit(10)
+                .all()
+            )
+            if not rows:
+                await message.answer("📊 暂无支出记录")
+                return
+            lines = ["📊 最近支出记录：\n"]
+            for exp in rows:
+                kind = "收入" if exp.amount > 0 else "支出"
+                lines.append(
+                    f"• {exp.expense_date.strftime('%Y-%m-%d %H:%M')} | {exp.category} | "
+                    f"{kind} ¥{abs(exp.amount):.2f}\n  {exp.description or ''}\n"
+                )
+            await message.answer("\n".join(lines))
+        finally:
+            session.close()
+
+    async def stats(self, message: types.Message):
+        session = get_session()
+        try:
+            user = session.query(User).filter_by(telegram_id=message.from_user.id).first()
+            if not user:
+                await message.answer("📈 暂无统计数据")
+                return
+            monthly = self.service.get_monthly_stats(user.id)
+            await message.answer(
+                f"📈 {monthly['month']}月统计\n"
+                f"总收入: ¥{monthly['total_income']:.2f}\n"
+                f"总支出: ¥{monthly['total_expense']:.2f}\n"
+                f"结余: ¥{monthly['balance']:.2f}"
+            )
+        finally:
+            session.close()
+
     async def handle_command(self, message: types.Message):
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text="📝 记一笔", callback_data="expense_add"),

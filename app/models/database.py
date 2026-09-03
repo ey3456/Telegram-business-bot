@@ -66,6 +66,36 @@ class SystemLog(Base):
     message = Column(Text)
     details = Column(JSON)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class ForwardConfig(Base):
+    __tablename__ = 'forward_config'
+    id = Column(Integer, primary_key=True)
+    source_chat_id = Column(Integer, nullable=False, index=True)
+    target_chat_ids = Column(JSON, nullable=False)
+    keywords = Column(JSON)
+    enabled = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class AutoReply(Base):
+    __tablename__ = 'auto_replies'
+    id = Column(Integer, primary_key=True)
+    keyword = Column(String(255), nullable=False, index=True)
+    reply = Column(Text, nullable=False)
+    enabled = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class Subscription(Base):
+    __tablename__ = 'subscriptions'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), unique=True, index=True)
+    plan = Column(String(50), nullable=False)
+    expiry_date = Column(DateTime)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    user = relationship("User")
 def get_engine():
     db_url = os.getenv('DATABASE_URL', 'sqlite:///./data/business_bot.db')
     if db_url.startswith('sqlite:///'):
