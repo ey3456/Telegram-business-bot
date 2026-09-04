@@ -9,6 +9,11 @@ from app.config import Config
 from app.bot.dispatcher import BotDispatcher
 from app.models.database import init_db
 from app.web.admin import app as flask_app
+
+os.makedirs('./data', exist_ok=True)
+os.makedirs('./logs', exist_ok=True)
+os.makedirs('./data/tts_audio', exist_ok=True)
+
 logging.basicConfig(
     level=getattr(logging, Config.LOG_LEVEL),
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -19,9 +24,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 def main():
-    os.makedirs('./data', exist_ok=True)
-    os.makedirs('./logs', exist_ok=True)
-    os.makedirs('./data/tts_audio', exist_ok=True)
     init_db()
     bot_dispatcher = BotDispatcher()
     if Config.WEBHOOK_URL:
